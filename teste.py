@@ -16,6 +16,7 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageDraw, ImageFont
 import pytesseract
 
 import fitz  # PyMuPDF
+from tempfile import NamedTemporaryFile
 
 try:
     from docx import Document
@@ -47,10 +48,20 @@ OUTPUT_DIR           = os.getenv("OUTPUT_DIR", "outputs")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+def load_json_from_env(env_var_name: str) -> str:
+    data = os.getenv(env_var_name)
+    if not data:
+        raise RuntimeError(f"Missing env var: {env_var_name}")
+    
+    tmp = NamedTemporaryFile(delete=False, suffix=".json")
+    tmp.write(data.encode("utf-8"))
+    tmp.close()
+    return tmp.name
+
 # Google Sheets
 GSHEET_ID          = "1flulATai_w_PxN1e33aokqpqw_wUJqi-2vtQU7bIpOo"
-GCREDENTIALS_PATH  = os.getenv("GOOGLE_CREDENTIALS", r"C:\Users\Asus\Downloads\utility-subset-487821-g5-0ff01afdec15.json")
-GOAUTH_TOKEN_PATH  = os.getenv("GOOGLE_OAUTH_TOKEN", r"C:\Users\Asus\Downloads\oauth_token.json")
+GCREDENTIALS_PATH = load_json_from_env("GOOGLE_CREDENTIALS_JSON")
+GOAUTH_TOKEN_PATH = load_json_from_env("GOOGLE_OAUTH_TOKEN_JSON")
 GSCOPES            = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
